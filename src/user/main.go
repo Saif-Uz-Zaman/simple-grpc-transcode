@@ -82,6 +82,26 @@ func (ugsi *UserGrpcServerImpl) GetUser(ctx context.Context, in *protoUser.GetUs
 	return response, nil
 }
 
+func (ugsi *UserGrpcServerImpl) GetAmount(ctx context.Context, in *protoUser.GetAmountRequest) (*protoUser.GetAmountResponse, error) {
+	tx, err := ugsi.conn.Begin(context.Background())
+	if err != nil {
+		log.Fatalf("conn.Begin Failed: %v", err)
+	}
+
+	id := in.GetId()
+	var balance int32
+	statementSql := `
+	SELECT balance FROM users WHERE id = ($1)
+	`
+	err = tx.QueryRow(context.Background(), statementSql, id).Scan(&balance)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	tx.Commit(context.Background())
+	response := &protoUser.GetAmountResponse{Balance: balance}
+	return response, nil
+}
+
 var (
 	grpcServerImpl *UserGrpcServerImpl            = &UserGrpcServerImpl{}
 	_              protoUser.UserManagementServer = grpcServerImpl
