@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package user;
+option go_package = "simple-grpc-transcode/proto/user";
+
+import "google/api/annotations.proto";
+
+service UserManagement {
+  rpc SeedUser (SeedUserRequest) returns (SeedUserResponse);
+  // rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  // rpc GetAmount (GetAmountRequest) returns (GetAmountResponse);
+}
+
+message SeedUserRequest {
+  string name = 1;
+  int32 balance = 2;
+}
+
+message SeedUserResponse {
+  string name = 1;
+  int32 id = 3;
+}
