@@ -7,7 +7,7 @@ import "google/api/annotations.proto";
 
 service UserManagement {
   rpc SeedUser (SeedUserRequest) returns (SeedUserResponse);
-  // rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
   // rpc GetAmount (GetAmountRequest) returns (GetAmountResponse);
 }
 
@@ -18,5 +18,14 @@ message SeedUserRequest {
 
 message SeedUserResponse {
   string name = 1;
-  int32 id = 3;
+  int32 id = 2;
 }
+
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message GetUserResponse {
+  string token = 1;
+}
+

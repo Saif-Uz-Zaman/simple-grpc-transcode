@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	protoUser "simple-grpc-transcode/proto/user"
+	tokenutill "simple-grpc-transcode/src/user/token-utill"
 
 	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc"
@@ -44,13 +45,12 @@ func (ugsi *UserGrpcServerImpl) SeedUser(ctx context.Context, in *protoUser.Seed
 		log.Fatalf("conn.Begin Failed: %v", err)
 	}
 
-	// _, err = tx.Exec(context.Background(), "insert into users(name, balance) values ($1, $2)", created_user.Name, created_user.Balance)
-	// if err != nil {
-	// 	log.Fatalf("tx.exec failed: %v", err)
-	// }
-
 	var id int32
-	err = tx.QueryRow(context.Background(), "insert into users(name, balance) values ($1, $2) RETURNING id;", created_user.Name, created_user.Balance).Scan(&id)
+	statementSql := `
+	insert into users(name, balance) 
+	values ($1, $2) RETURNING id;
+	`
+	err = tx.QueryRow(context.Background(), statementSql, created_user.Name, created_user.Balance).Scan(&id)
 
 	if err != nil {
 		log.Fatalf("Unable to execute the query. %v", err)
@@ -58,6 +58,27 @@ func (ugsi *UserGrpcServerImpl) SeedUser(ctx context.Context, in *protoUser.Seed
 	tx.Commit(context.Background())
 
 	response := &protoUser.SeedUserResponse{Name: in.Name, Id: id}
+	return response, nil
+}
+
+func (ugsi *UserGrpcServerImpl) GetUser(ctx context.Context, in *protoUser.GetUserRequest) (*protoUser.GetUserResponse, error) {
+	tx, err := ugsi.conn.Begin(context.Background())
+	if err != nil {
+		log.Fatalf("conn.Begin Failed: %v", err)
+	}
+
+	id := in.GetId()
+	name := ""
+	statementSql := `
+	SELECT name FROM users WHERE id = ($1)
+	`
+	err = tx.QueryRow(context.Background(), statementSql, id).Scan(&name)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	tx.Commit(context.Background())
+	token := tokenutill.GenerateToken(id, name)
+	response := &protoUser.GetUserResponse{Token: token}
 	return response, nil
 }
 
