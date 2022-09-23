@@ -116,6 +116,7 @@ func getenv(key, fallback string) string {
 }
 
 func main() {
+	fmt.Printf("%s\n", tokenutill.GenerateJWK())
 	// pgsql connection
 	database_url := getenv("POSTGRES_CONN_STRING", "postgres://postgres:postgres@localhost:5432/postgres")
 	conn, err := pgx.Connect(context.Background(), database_url)
