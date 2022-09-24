@@ -23,8 +23,8 @@ type UserGrpcServerImpl struct {
 	protoUser.UnimplementedUserManagementServer
 }
 
-func (ugsi *UserGrpcServerImpl) SeedUser(ctx context.Context, in *protoUser.SeedUserRequest) (*protoUser.SeedUserResponse, error) {
-	log.Printf("Received: %v", in.GetName())
+func (ugsi *UserGrpcServerImpl) SeedUser(ctx context.Context, in *protoUser.User) (*protoUser.SeedUserResponse, error) {
+	log.Printf("Received: %v", in.Name)
 
 	createSql := `
 	create table if not exists users(
@@ -39,7 +39,7 @@ func (ugsi *UserGrpcServerImpl) SeedUser(ctx context.Context, in *protoUser.Seed
 		os.Exit(1)
 	}
 
-	created_user := &protoUser.SeedUserRequest{Name: in.GetName(), Balance: in.GetBalance()}
+	created_user := &protoUser.User{Name: in.Name, Balance: in.Balance}
 	tx, err := ugsi.conn.Begin(context.Background())
 	if err != nil {
 		log.Fatalf("conn.Begin Failed: %v", err)
@@ -57,7 +57,7 @@ func (ugsi *UserGrpcServerImpl) SeedUser(ctx context.Context, in *protoUser.Seed
 	}
 	tx.Commit(context.Background())
 
-	response := &protoUser.SeedUserResponse{Name: in.Name, Id: id}
+	response := &protoUser.SeedUserResponse{Id: id}
 	return response, nil
 }
 
@@ -102,6 +102,28 @@ func (ugsi *UserGrpcServerImpl) GetAmount(ctx context.Context, in *protoUser.Get
 	return response, nil
 }
 
+func (ugsi *UserGrpcServerImpl) UpdateUserBalance(ctx context.Context, in *protoUser.UpdateUserBalanceRequest) (*protoUser.UpdateUserBalanceResponse, error) {
+	tx, err := ugsi.conn.Begin(context.Background())
+	if err != nil {
+		log.Fatalf("conn.Begin Failed: %v", err)
+	}
+
+	id := in.GetId()
+	changeBalance := in.GetBalance()
+	var balance int32
+	statementSql := `
+	Update users SET balance = balance + ($1) WHERE id = ($2)
+	RETURNING balance;
+	`
+	err = tx.QueryRow(context.Background(), statementSql, changeBalance, id).Scan(&balance)
+	if err != nil {
+		log.Fatalf("Unable to execute the query. %v", err)
+	}
+	tx.Commit(context.Background())
+	response := &protoUser.UpdateUserBalanceResponse{Balance: balance}
+	return response, nil
+}
+
 var (
 	grpcServerImpl *UserGrpcServerImpl            = &UserGrpcServerImpl{}
 	_              protoUser.UserManagementServer = grpcServerImpl
@@ -118,7 +140,7 @@ func getenv(key, fallback string) string {
 func main() {
 	fmt.Printf("%s\n", tokenutill.GenerateJWK())
 	// pgsql connection
-	database_url := getenv("POSTGRES_CONN_STRING", "postgres://postgres:postgres@localhost:5432/postgres")
+	database_url := getenv("POSTGRES_CONN_STRING", "postgres://userdb:userdb@localhost:5432/userdb")
 	conn, err := pgx.Connect(context.Background(), database_url)
 	if err != nil {
 		log.Fatalf("Unable to establish connection: %v", err)

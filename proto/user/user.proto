@@ -6,19 +6,35 @@ option go_package = "simple-grpc-transcode/proto/user";
 import "google/api/annotations.proto";
 
 service UserManagement {
-  rpc SeedUser (SeedUserRequest) returns (SeedUserResponse);
-  rpc GetUser (GetUserRequest) returns (GetUserResponse);
-  rpc GetAmount (GetAmountRequest) returns (GetAmountResponse);
+  rpc SeedUser (User) returns (SeedUserResponse) {
+    option (google.api.http) = {
+      post: "/user/seeduser"
+    };
+  }
+  rpc GetUser (GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      post: "/user/getuser"
+    };
+  }
+  rpc GetAmount (GetAmountRequest) returns (GetAmountResponse) {
+    option (google.api.http) = {
+      post: "/user/getamount"
+    };
+  }
+  rpc UpdateUserBalance (UpdateUserBalanceRequest) returns (UpdateUserBalanceResponse);
 }
 
-message SeedUserRequest {
+message User {
   string name = 1;
   int32 balance = 2;
 }
 
+message SeedUserRequest {
+  User user = 1;
+}
+
 message SeedUserResponse {
-  string name = 1;
-  int32 id = 2;
+  int32 id = 1;
 }
 
 message GetUserRequest {
@@ -34,5 +50,14 @@ message GetAmountRequest {
 }
 
 message GetAmountResponse {
+  int32 balance = 1;
+}
+
+message UpdateUserBalanceRequest {
+  int32 id = 1;
+  int32 balance = 2;
+}
+
+message UpdateUserBalanceResponse {
   int32 balance = 1;
 }

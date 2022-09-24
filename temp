@@ -1,0 +1,3 @@
+curl -X POST -H "CallType: GRPC_Call" http://istio-simplegrpc.dev.svc.cluster.local:8081/user/seeduser -d '{ "name": "new0ne","balance": "200"}'
+curl -X POST -H "CallType: GRPC_Call" http://istio-simplegrpc.dev.svc.cluster.local:8081/user/getuser -d '{ "id": "1" }'
+curl -X POST -H "CallType: GRPC_Call" http://istio-simplegrpc.dev.svc.cluster.local:8081/user/getamount -d '{ "id": "1" }'

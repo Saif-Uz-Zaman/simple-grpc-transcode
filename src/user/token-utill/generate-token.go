@@ -55,6 +55,7 @@ func GenerateToken(id int32, name string) string {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 12)),
 			Issuer:    "simple-jwt-provider",
+			Subject:   "simple-jwt-provider",
 		},
 	}
 
