@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package transaction;
+option go_package = "simple-grpc-transcode/proto/transaction";
+
+import "google/api/annotations.proto";
+
+service TransactionManagement {
+  rpc UpTransaction (UpdateTxRequest) returns (UpdateTxResponse) {
+    option (google.api.http) = {
+      post: "/transaction/up"
+    };
+  };
+  rpc DownTransaction (UpdateTxRequest) returns (UpdateTxResponse) {
+    option (google.api.http) = {
+      post: "/transaction/down"
+    };
+  };
+}
+
+message UpdateTxRequest {
+  int32 id = 1;
+  int32 amount = 2;
+}
+
+message UpdateTxResponse {
+  int32 balance = 1;
+}

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-grpc-transcode-transaction
+  namespace: dev
+  labels:
+    app: simple-grpc-transcode-transaction
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-grpc-transcode-transaction
+  template:
+    metadata:
+      labels:
+        app: simple-grpc-transcode-transaction
+      annotations:
+        io.kubernetes.cri.untrusted-workload: 'true'
+        sidecar.istio.io/userVolume: '[{"name":"descriptor","configMap":{"name":"transaction-rpc-proto-descriptor","items":[{"key":"transaction-grpc-transcode.pd","path":"transaction-grpc-transcode.pd"}]}}]'
+        sidecar.istio.io/userVolumeMount: '[{"name":"descriptor","mountPath":"/etc/envoy"}]'
+    spec:
+      serviceAccountName: simple-grpc-transcode-transaction
+      containers:
+        - name: simple-grpc-transcode-transaction
+          image: saifmaruf/simple-grpc-transcode-transaction:0.1.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          env:
+            - name: POSTGRES_CONN_STRING
+              value: postgres://transactiondb:transactiondb@postgres:5432/transactiondb
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m

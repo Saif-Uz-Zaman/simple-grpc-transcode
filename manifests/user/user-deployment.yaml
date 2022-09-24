@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-grpc-transcode-user
+  namespace: dev
+  labels:
+    app: simple-grpc-transcode-user
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-grpc-transcode-user
+  template:
+    metadata:
+      labels:
+        app: simple-grpc-transcode-user
+      annotations:
+        io.kubernetes.cri.untrusted-workload: 'true'
+        sidecar.istio.io/userVolume: '[{"name":"descriptor","configMap":{"name":"user-rpc-proto-descriptor","items":[{"key":"user-grpc-transcode.pd","path":"user-grpc-transcode.pd"}]}}]'
+        sidecar.istio.io/userVolumeMount: '[{"name":"descriptor","mountPath":"/etc/envoy"}]'
+    spec:
+      serviceAccountName: simple-grpc-transcode-user
+      containers:
+        - name: simple-grpc-transcode-user
+          image: saifmaruf/simple-grpc-transcode-user:0.1.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          env:
+            - name: POSTGRES_CONN_STRING
+              value: postgres://userdb:userdb@postgres:5432/userdb
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m

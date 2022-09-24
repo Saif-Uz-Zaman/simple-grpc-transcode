@@ -1,0 +1,21 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: simple-grpc-transcode-transaction
+  namespace: dev
+spec:
+  selector:
+    app: simple-grpc-transcode-transaction
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+      name: grpc-simple  
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: simple-grpc-transcode-transaction
+  namespace: dev
+automountServiceAccountToken: true

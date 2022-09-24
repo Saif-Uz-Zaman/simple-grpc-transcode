@@ -39,4 +39,4 @@ spec:
           initial_connection_window_size: 65536
   workloadSelector:
     labels:
-      app: simple-grpc-transcode
+      app: simple-grpc-transcode-user
