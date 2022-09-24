@@ -22,13 +22,15 @@ spec:
       serviceAccountName: simple-grpc-transcode-transaction
       containers:
         - name: simple-grpc-transcode-transaction
-          image: saifmaruf/simple-grpc-transcode-transaction:0.1.4
+          image: saifmaruf/simple-grpc-transcode-transaction:0.1.5
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
           env:
             - name: POSTGRES_CONN_STRING
               value: postgres://transactiondb:transactiondb@postgres:5432/transactiondb
+            - name: USER_SERVICE
+              value: simple-grpc-transcode-user:8081
           resources:
             requests:
               memory: 128Mi

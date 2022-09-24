@@ -7,10 +7,13 @@ import (
 	"net"
 	"os"
 	protoTransaction "simple-grpc-transcode/proto/transaction"
+	protoUser "simple-grpc-transcode/proto/user"
 	tokenutill "simple-grpc-transcode/src/user/token-utill"
+	"time"
 
 	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -27,6 +30,27 @@ var (
 	grpcServerImpl *TransactionGrpcServerImpl                   = &TransactionGrpcServerImpl{}
 	_              protoTransaction.TransactionManagementServer = grpcServerImpl
 )
+
+func UpdateUserAndGetCurrentBalance(id int32, amount int32) int32 {
+	address := getenv("USER_SERVICE", "localhost:8081")
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+	c := protoUser.NewUserManagementClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	r, err := c.UpdateUserBalance(ctx, &protoUser.UpdateUserBalanceRequest{Id: id, Balance: amount})
+	if err != nil {
+		log.Fatalf("Could not get user balance %v", err)
+	}
+
+	return r.Balance
+}
 
 func CreateTransaction(tgsi *TransactionGrpcServerImpl, in *protoTransaction.UpdateTxRequest, tx_status string, current_balance int32) {
 	createSql := `
@@ -63,7 +87,7 @@ func CreateTransaction(tgsi *TransactionGrpcServerImpl, in *protoTransaction.Upd
 
 func (tgsi *TransactionGrpcServerImpl) UpTransaction(ctx context.Context, in *protoTransaction.UpdateTxRequest) (*protoTransaction.UpdateTxResponse, error) {
 	log.Printf("Received Id: %v", in.Id)
-	current_balance := int32(200)
+	current_balance := UpdateUserAndGetCurrentBalance(in.Id, in.Amount)
 	CreateTransaction(tgsi, in, "credited", current_balance)
 	response := &protoTransaction.UpdateTxResponse{Balance: current_balance}
 	return response, nil
@@ -71,7 +95,8 @@ func (tgsi *TransactionGrpcServerImpl) UpTransaction(ctx context.Context, in *pr
 
 func (tgsi *TransactionGrpcServerImpl) DownTransaction(ctx context.Context, in *protoTransaction.UpdateTxRequest) (*protoTransaction.UpdateTxResponse, error) {
 	log.Printf("Received Id: %v", in.Id)
-	current_balance := int32(200)
+	current_balance := UpdateUserAndGetCurrentBalance(in.Id, in.Amount*-1)
+	// pass negative value of amount
 	CreateTransaction(tgsi, in, "debited", current_balance)
 	response := &protoTransaction.UpdateTxResponse{Balance: current_balance}
 	return response, nil

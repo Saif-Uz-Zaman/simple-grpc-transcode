@@ -14,5 +14,5 @@ curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/
 
 ---
 
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "5", "amount": "150" }'
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/down -d '{ "id": "5", "amount": "150" }'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "3", "amount": "100" }'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/down -d '{ "id": "3", "amount": "150" }'

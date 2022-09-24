@@ -1,7 +1,7 @@
 GOOGLEAPIS_DIR = ./googleapis-proto
 APP_PREFIX = simple-grpc-transcode
 DOCKER_REPO = saifmaruf
-RELEASE = 0.1.4
+RELEASE = 0.1.5
 
 
 proto-user:

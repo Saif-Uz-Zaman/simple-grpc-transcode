@@ -22,7 +22,7 @@ spec:
       serviceAccountName: simple-grpc-transcode-user
       containers:
         - name: simple-grpc-transcode-user
-          image: saifmaruf/simple-grpc-transcode-user:0.1.4
+          image: saifmaruf/simple-grpc-transcode-user:0.1.5
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
