@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: simple-grpc-transcode-gateway-virtualservice
+  namespace: dev
+spec:
+  hosts:
+  - "www.simple-grpc-transcode.com"
+  gateways:
+  - simple-grpc-transcode-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /user
+    route:
+    - destination:
+        host: simple-grpc-transcode-user
+        port:
+          number: 8081
+  - match:
+    - uri:
+        prefix: /transaction
+    route:
+    - destination:
+        host: simple-grpc-transcode-transaction
+        port:
+          number: 8082
