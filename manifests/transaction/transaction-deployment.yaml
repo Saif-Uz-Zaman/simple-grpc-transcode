@@ -22,7 +22,7 @@ spec:
       serviceAccountName: simple-grpc-transcode-transaction
       containers:
         - name: simple-grpc-transcode-transaction
-          image: saifmaruf/simple-grpc-transcode-transaction:0.1.3
+          image: saifmaruf/simple-grpc-transcode-transaction:0.1.4
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081

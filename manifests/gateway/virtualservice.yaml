@@ -19,7 +19,7 @@ spec:
           number: 8081
   - match:
     - uri:
-        prefix: /transaction
+        prefix: /transactions
     route:
     - destination:
         host: simple-grpc-transcode-transaction

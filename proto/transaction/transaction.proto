@@ -8,12 +8,12 @@ import "google/api/annotations.proto";
 service TransactionManagement {
   rpc UpTransaction (UpdateTxRequest) returns (UpdateTxResponse) {
     option (google.api.http) = {
-      post: "/transaction/up"
+      post: "/transactions/up"
     };
   };
   rpc DownTransaction (UpdateTxRequest) returns (UpdateTxResponse) {
     option (google.api.http) = {
-      post: "/transaction/down"
+      post: "/transactions/down"
     };
   };
 }

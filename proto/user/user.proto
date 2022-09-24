@@ -13,12 +13,12 @@ service UserManagement {
   }
   rpc GetUser (GetUserRequest) returns (GetUserResponse) {
     option (google.api.http) = {
-      post: "/user/getuser"
+      post: "/user/login"
     };
   }
   rpc GetAmount (GetAmountRequest) returns (GetAmountResponse) {
     option (google.api.http) = {
-      post: "/user/getamount"
+      post: "/user/balance"
     };
   }
   rpc UpdateUserBalance (UpdateUserBalanceRequest) returns (UpdateUserBalanceResponse);

@@ -8,11 +8,11 @@ curl -X POST -H "CallType: GRPC_Call" http://simple-grpc-transcode-transaction.d
 
 ---
 
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/seeduser -d '{ "name": "new0ne","balance": "200"}'
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/getuser -d '{ "id": "1" }'
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/getamount -d '{ "id": "1" }'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/seeduser -d '{ "name": "secondOne","balance": "200"}'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/login -d '{ "id": "2" }'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/balance -d '{ "id": "2" }'
 
 ---
 
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transaction/up -d '{ "id": "4", "amount": "100" }'
-curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transaction/down -d '{ "id": "4", "amount": "100" }'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "5", "amount": "150" }'
+curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/down -d '{ "id": "5", "amount": "150" }'

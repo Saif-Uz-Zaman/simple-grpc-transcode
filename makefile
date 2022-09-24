@@ -1,7 +1,7 @@
 GOOGLEAPIS_DIR = ./googleapis-proto
 APP_PREFIX = simple-grpc-transcode
 DOCKER_REPO = saifmaruf
-RELEASE = 0.1.3
+RELEASE = 0.1.4
 
 
 proto-user:
@@ -45,7 +45,12 @@ clean:
 deploy-pg: 
 	kubectl apply -f manifests/postgres.yaml
 
+deploy-gateway:
+	kubectl apply -f manifests/gateway
+
 proto-all: proto-user proto-transaction
 build-all: build-user build-transaction
 docker-all: docker-user docker-transaction
-deploy-all: deploy-user deploy-transaction deploy-pg
+deploy-all: deploy-user deploy-transaction deploy-pg deploy-gateway
+
+all: proto-all build-all docker-all deploy-all
