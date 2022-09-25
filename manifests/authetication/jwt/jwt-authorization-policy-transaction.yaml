@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: jwt-auth-policy-transaction
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: simple-grpc-transcode-transaction
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths: ["/transactions/*"]
+    from:
+      - source:
+          requestPrincipals: ["simple-jwt-provider/simple-jwt-provider"]

@@ -1,0 +1,13 @@
+apiVersion: "security.istio.io/v1beta1"
+kind: "RequestAuthentication"
+metadata:
+  name: jwt-request-authentication-transaction
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: simple-grpc-transcode-transaction
+  jwtRules:
+  - issuer: "simple-jwt-provider"
+    jwks: |
+      {"keys":[{"e":"AQAB","kid":"JWK_ID","kty":"RSA","n":"xfSa2QIV-l7zRrCss1vhP0Cnqq6O70XYsKUcknZOI3OfFr1AMhG9x3Qnv68q1rA80cuyD1RFVoph2BjTayfZPdN7gj5HxcZHcNNsERKAssIblGlLU-Z1v8bGC34qoR7bUnc7vwJUNhiuziVtrYoI00XEjhPhjYu19wgxR_Myo0rNWAToX7npeg9sFOb3aN7v-l2ZIB-ylG5AVnPWKxb4J1leEeLE5TCxwl5RgSZ2hHwK6Dr7_mbrJJLF54JPsv3PatzUlrZXPbwaFwgLJFdjHmSaYqApFN07zP_zimP0Mh3Ft7KGhRVvuZf84Ots8J-X2U5zLw-N98KA39YU2_MRaw"}]}
