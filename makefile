@@ -3,6 +3,8 @@ APP_PREFIX = simple-grpc-transcode
 DOCKER_REPO = saifmaruf
 RELEASE = 0.1.7
 
+jwks:
+	go run src/jwks-tools/jwks.go
 
 proto-user:
 	protoc -I${GOOGLEAPIS_DIR} -I. -I/usr/local/include --include_imports --include_source_info --descriptor_set_out=proto/user-grpc-transcode.pd --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative proto/user/user.proto && \
@@ -47,6 +49,9 @@ deploy-pg:
 
 deploy-gateway:
 	kubectl apply -f manifests/gateway
+
+deploy-authn:
+	kubectl apply -f manifests/authetication/jwt
 
 proto-all: proto-user proto-transaction
 build-all: build-user build-transaction

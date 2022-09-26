@@ -277,3 +277,94 @@ Here is our api call flow,
       3 | bazz |    1600
     ```
 **I have created a `UpdateUserBalance` `gRPC endpoint for` `user` service which is responsible for updating balance of a particular user. And during the transaction I have called this endpoint and retrive the `user_current_balance`.**
+
+
+## Authentication:
+
+Let's authenticate our `transaction service`. For microservices we need not reduntdant same authentication method for every services, we can do the authentication mechanism in the `side cars`. As we are using `envoy-proxy` as side car we can use both `EnvoyFilter` or other istio resources like `RequestAuthentication` and `AuthorizationPolicy`. But bare in mind that, authorization need to be implemented on the services.
+
+## Setup Authentication
+
+In this demo we will use jwt validation in th side cars.
+
+- Create JWKS from our public key.
+
+  ```
+  make jwks
+  ```
+
+  you will get a `JWKS` like string
+- The k8s manifests are in the `manifests/authetication/jwt` directory. Check them out.
+- Put the `JWKS` got from the previous step in the related field
+- You can now apply them in our cluster or, using
+
+    ```
+    make deploy-authn
+    ```
+
+## Demo Authentication
+
+1. Let's get the user balance of `id 2`
+
+    ```
+    curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/balance -d '{ "id": "2" }'
+
+    // Output:
+    // 
+    // {
+    //  "balance": 1500
+    // }
+    ```
+
+
+2. Let's make a transaction for the user 2
+    ```
+    curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "2", "amount": "100" }'  -w "\n\n%{http_code}"
+
+    // Output:
+    // RBAC: access denied
+    // 
+    // 403
+    ```
+
+3. Let's pass an expired token
+
+    ```
+    curl -X POST -H "CallType: GRPC_Call" -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6ImZvbyIsIklkIjoxLCJpc3MiOiJzaW1wbGUtand0LXByb3ZpZGVyIiwic3ViIjoic2ltcGxlLWp3dC1wcm92aWRlciIsImV4cCI6MTY2NDE3NjQ5Mn0.HNo1QqYGbJxkcjHbi-DfJsDCYmjV8izBcvVwqhHoPdUCs3wQoc3SOAbfMgg068MczNBG_REzPRPBR7eeprSjn3A3xzoZRmRgsOr29YihwzPY3Htki2q4CATRqmCysfPBySKB9cjBMpvCx8RvnAqNTMD-I-XojVpkY3yDhVprZYOfP3Lojzv0qNOeiGbqmrBNlTNX5_NEPuhhGh_wZLipw3ic6bbJQqt3DXJrVMsLUTq5XAryaqYzscrKUC7n1ewClaGX3QxI9242ZKXtQ8-mSx46HQ028g3NehT377df1A1f4b3fv-ddkbj28iYpGMD9IHiFjTovoWMFt2XjYM5UtQ" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "2", "amount": "100" }'  -w "\n\n%{http_code}"
+
+    // Output
+    // Jwt is expired
+    // 
+    // 401
+    ```
+4. Let's pass an invalid token
+
+    ```
+    curl -X POST -H "CallType: GRPC_Call" -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVJ9.eJVc2VyTmFtZSI6ImZvbyIsIklkIjoxLCJpc3MiOiJzaW1wbGUtand0LXByb3ZpZGVyIiwic3ViIjoic2ltcGxlLWp3dC1wcm92aWRlciIsImV4cCI6MTY2NDE3N5Mn0.HNo1QqYGbJxkcjHbi-DfJsDCYmjV8izBcvVwqhHoPdUCs3wQoc3SOAbfMgg068MczNBG_REzPRPBR7eeprSjn3A3xzoZRmRgsOr29YihwzPY3Htki2q4CATRqmCysfPBySKB9cjBMpvCx8RvnAqNTXojVpkY3yDhVprZYOfP3Lojzv0qNOeiGbqmrBNlTNX5_NEPuhhGh_wZLipw3ic6bbJQqt3DXJrVMsLUTq5XAryaqYzscrKUC7n1ewClaGX3QxI9242ZKXtQ8-mSx46HQ028g3NehT377df1A1f4b3fv-ddkbj28iYpGMD9IHiFjTovoWMFt2XjYM5U" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "2", "amount": "100" }'  -w "\n\n%{http_code}"       
+    
+    // Jwt header is an invalid JSON
+    // 
+    // 401
+    ```
+5. Let's get an token and make a transaction
+
+    ```
+    curl -X POST -H "CallType: GRPC_Call" http://www.simple-grpc-transcode.com/user/login -d '{ "id": "2" }'
+
+    // Output:
+    // {
+    //  "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6ImJhciIsIklkIjoyLCJpc3MiOiJzaW1wbGUtand0LXByb3ZpZGVyIiwic3ViIjoic2ltcGxlLWp3dC1wcm92aWRlciIsImV4cCI6MTY2NDIyMjQ3Mn0.QBm9M3TRALFhXbZiFY4ObU5zy-v-6MgZlsdBV2o3de-HJ99a4CD2a9RajXzYtY7gUl7bTJq3LDl2n7QyCmcNIBLq_gB-Xq7lEsmrOluuyYGec2Tm1zk3-edfOdzT2jNCtZzRdaYbITHQCTD2Z8tznwn3E838NlWqMx1Rb12Q-F1vZ6u0LKY4qNenYJ14woHA1QtEO2BHcoW06GvS5Is1xV34ZXYx-fsgUehPA4a93ETXBiXrrkQIt3GV3jdoeYF9lgJoRQYbpri77SMx85iLzANzX2Tkd5PNAmnSIXj0nU2ls9u2UViOnkmd9gKHd_kavspwxQCu7BbAGqiwh2wkTg"
+    // }
+
+    TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6ImJhciIsIklkIjoyLCJpc3MiOiJzaW1wbGUtand0LXByb3ZpZGVyIiwic3ViIjoic2ltcGxlLWp3dC1wcm92aWRlciIsImV4cCI6MTY2NDIyMjQ3Mn0.QBm9M3TRALFhXbZiFY4ObU5zy-v-6MgZlsdBV2o3de-HJ99a4CD2a9RajXzYtY7gUl7bTJq3LDl2n7QyCmcNIBLq_gB-Xq7lEsmrOluuyYGec2Tm1zk3-edfOdzT2jNCtZzRdaYbITHQCTD2Z8tznwn3E838NlWqMx1Rb12Q-F1vZ6u0LKY4qNenYJ14woHA1QtEO2BHcoW06GvS5Is1xV34ZXYx-fsgUehPA4a93ETXBiXrrkQIt3GV3jdoeYF9lgJoRQYbpri77SMx85iLzANzX2Tkd5PNAmnSIXj0nU2ls9u2UViOnkmd9gKHd_kavspwxQCu7BbAGqiwh2wkTg
+
+    curl -X POST -H "CallType: GRPC_Call" -H "Authorization: Bearer $TOKEN" http://www.simple-grpc-transcode.com/transactions/up -d '{ "id": "2", "amount": "100" }'  -w "\n\n%{http_code}"
+
+    // Output
+    // {
+    //  "balance": 1600
+    // }
+    // 
+    // 
+    // 200
+    ```
