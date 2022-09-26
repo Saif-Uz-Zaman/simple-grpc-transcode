@@ -53,6 +53,12 @@ deploy-gateway:
 deploy-authn:
 	kubectl apply -f manifests/authetication/jwt
 
+deploy-envoy-logging:
+	kubectl apply -f manifests/telemetry/telemetry-access-logging.yaml
+
+deploy-addons:
+	kubectl apply -f manifests/telemetry
+
 proto-all: proto-user proto-transaction
 build-all: build-user build-transaction
 docker-all: docker-user docker-transaction

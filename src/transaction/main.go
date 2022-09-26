@@ -8,7 +8,6 @@ import (
 	"os"
 	protoTransaction "simple-grpc-transcode/proto/transaction"
 	protoUser "simple-grpc-transcode/proto/user"
-	tokenutill "simple-grpc-transcode/src/user/token-utill"
 	"time"
 
 	"github.com/jackc/pgx/v4"
@@ -111,7 +110,6 @@ func getenv(key, fallback string) string {
 }
 
 func main() {
-	fmt.Printf("%s\n", tokenutill.GenerateJWK())
 	// pgsql connection
 	database_url := getenv("POSTGRES_CONN_STRING", "postgres://transactiondb:transactiondb@localhost:5432/transactiondb")
 	conn, err := pgx.Connect(context.Background(), database_url)

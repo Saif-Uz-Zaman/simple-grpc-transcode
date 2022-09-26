@@ -368,3 +368,40 @@ In this demo we will use jwt validation in th side cars.
     // 
     // 200
     ```
+
+## Telemetry
+
+In this demo we are using istio, basically we are using `envoy` as a side car proxy. Why I have used side car proxy rather than centralize proxy?
+- To get the telemetry indivudually.
+- To config the reverse proxy individually. So that it wouldn't create any noisy neighbor problem.
+- If we missconfigure any particual proxy it woldn't effect the other services
+- Istio provides EnvoyFilter CRD we can use and store them as a kubernetes manifest.
+- For easy debugging and easy maintence.
+- If we maintain central proxy and we need gateway acess log or something, then it is difficult to segregate the specific service access log.
+- If we put the whole proto descriptor, lets say we have 100 grpc services and we put the whole proto descriptor in a single proxy, then it is time consuming to get the specific property for a specific services.
+- We can also inspect the service access log and envoy configure for indivudual services.
+- For getting the acess log of services we can set
+    ```
+    make deploy-envoy-logging
+    kubectl -n dev logs -f deployments/simple-grpc-transcode-user -c istio-proxy
+    kubectl -n dev logs -f deployments/simple-grpc-transcode-transaction -c istio-proxy
+    ```
+- For getting the envoy config for individual service
+    ```
+    istioctl proxy-status
+    istioctl proxy-config listeners simple-grpc-transcode-transaction-8644969479-z6p8x.dev -o json
+    ```
+
+Istio have some built-in addons for Metrics [Prometheus, Grafana] and, Traces [Jaeger, Kiali]. Lets install them on our cluster
+
+```
+make deploy-addons
+```
+
+Now you can access their ui using
+```
+istioctl dashboard kiali
+istioctl dashboard prometheus
+istioctl dashboard jaeger
+istioctl dashboard grafana
+```
