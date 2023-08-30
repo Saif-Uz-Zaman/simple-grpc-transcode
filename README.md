@@ -397,7 +397,6 @@ Istio have some built-in addons for Metrics [Prometheus, Grafana] and, Traces [J
 ```
 make deploy-addons
 ```
-
 Now you can access their ui using
 ```
 istioctl dashboard kiali
